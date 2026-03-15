@@ -274,43 +274,69 @@
 
     // PWA Install Prompt
     let deferredPrompt;
+    let promptDismissedThisSession = false;
     const installPrompt = document.getElementById('installPrompt');
     const installBtn = document.getElementById('installBtn');
     const dismissBtn = document.getElementById('dismissBtn');
+    const PROMPT_DELAY = 3000; // 3 sekundy
 
     window.addEventListener('beforeinstallprompt', e => {
+      console.log('📱 beforeinstallprompt event captured');
       e.preventDefault();
       deferredPrompt = e;
       
-      // Pokaż prompt jeśli nie był wcześniej odrzucony
-      if (!localStorage.getItem('pwaInstallDismissed')) {
-        setTimeout(() => {
+      // Resetuj flagi po każdym nowym evencie
+      promptDismissedThisSession = false;
+      
+      // Pokaż prompt
+      setTimeout(() => {
+        if (deferredPrompt && !promptDismissedThisSession) {
+          console.log('📱 Pokazuję install prompt');
           installPrompt.classList.add('show');
-        }, 2000);
-      }
+        }
+      }, PROMPT_DELAY);
     });
 
     installBtn.addEventListener('click', async () => {
+      console.log('👆 Kliknięto Instaluj');
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response: ${outcome}`);
+        console.log(`✅ User escolhio: ${outcome}`);
+        
+        if (outcome === 'accepted') {
+          console.log('📱 Aplikacja zainstalowana poprawnie');
+        }
+        
         deferredPrompt = null;
+        promptDismissedThisSession = true;
         installPrompt.classList.remove('show');
+      } else {
+        console.warn('⚠️ deferredPrompt nie jest dostępny');
       }
     });
 
     dismissBtn.addEventListener('click', () => {
-      localStorage.setItem('pwaInstallDismissed', 'true');
+      console.log('❌ User odrzucił prompt');
+      promptDismissedThisSession = true;
       installPrompt.classList.remove('show');
-      deferredPrompt = null;
+      // Nie blokujemy localStorage - prompt będzie dostępny po odświeżeniu
     });
 
     window.addEventListener('appinstalled', () => {
-      console.log('✅ Aplikacja zainstalowana!');
+      console.log('✅ Aplikacja zainstalowana na urządzeniu!');
       installPrompt.classList.remove('show');
+      promptDismissedThisSession = true;
       deferredPrompt = null;
     });
+
+    // Debug - możliwość resetowania w konsoli
+    window.resetInstallPrompt = () => {
+      console.log('🔄 Resetuję install prompt');
+      promptDismissedThisSession = false;
+      deferredPrompt = null;
+      installPrompt.classList.remove('show');
+    };
 
     // Kolorowanie zgodnie z ustawieniami
     const handColor = localStorage.getItem('zegar_handColor') || 'white';
