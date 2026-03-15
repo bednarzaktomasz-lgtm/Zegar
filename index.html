@@ -138,7 +138,7 @@
     }
 
     .install-topbar-btn {
-      display: none;
+      display: flex;
       align-items: center;
       gap: 10px;
       padding: 0 20px;
@@ -155,13 +155,76 @@
       white-space: nowrap;
     }
 
-    .install-topbar-btn.visible {
-      display: flex;
+    .install-topbar-btn.hidden {
+      display: none;
     }
 
     .install-topbar-btn:hover {
       background: #ff3333;
       transform: scale(1.03);
+    }
+
+    .manual-install-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .manual-install-modal.show {
+      display: flex;
+    }
+
+    .manual-install-content {
+      background: #1a1a1a;
+      border: 2px solid #d82928;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      color: #f0f0f0;
+      text-align: center;
+    }
+
+    .manual-install-content h2 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .manual-install-content p {
+      margin-bottom: 16px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    .manual-install-content .steps {
+      text-align: left;
+      margin: 20px 0;
+      padding-left: 20px;
+    }
+
+    .manual-install-content .steps li {
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+
+    .manual-install-content .close-modal-btn {
+      margin-top: 20px;
+      padding: 12px 32px;
+      background: #d82928;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     .install-prompt {
@@ -273,6 +336,40 @@
     </div>
   </div>
 
+  <!-- Manual Install Modal -->
+  <div class="manual-install-modal" id="manualInstallModal">
+    <div class="manual-install-content">
+      <h2>📲 Jak zainstalować aplikację?</h2>
+      <p>Twoja przeglądarka nie obsługuje automatycznej instalacji. Wykonaj poniższe kroki:</p>
+      
+      <div id="androidInstructions" style="display:none">
+        <ol class="steps">
+          <li>Kliknij <strong>menu</strong> (⋮) w prawym górnym rogu Chrome</li>
+          <li>Wybierz <strong>"Zainstaluj aplikację"</strong> lub <strong>"Dodaj do ekranu głównego"</strong></li>
+          <li>Potwierdź instalację</li>
+        </ol>
+      </div>
+      
+      <div id="iosInstructions" style="display:none">
+        <ol class="steps">
+          <li>Kliknij przycisk <strong>Udostępnij</strong> (↑) na dole Safari</li>
+          <li>Przewiń i wybierz <strong>"Dodaj do ekranu początkowego"</strong></li>
+          <li>Kliknij <strong>"Dodaj"</strong> w prawym górnym rogu</li>
+        </ol>
+      </div>
+      
+      <div id="desktopInstructions" style="display:none">
+        <ol class="steps">
+          <li>Kliknij ikonę <strong>instalacji</strong> (⬇) w pasku adresu</li>
+          <li>Lub menu (⋮) → <strong>"Zainstaluj Zegar"</strong></li>
+          <li>Potwierdź instalację</li>
+        </ol>
+      </div>
+      
+      <button class="close-modal-btn" id="closeModalBtn">Rozumiem</button>
+    </div>
+  </div>
+
   <script>
     // Rejestracja Service Workera
     if ('serviceWorker' in navigator) {
@@ -306,33 +403,57 @@
     const installPrompt = document.getElementById('installPrompt');
     const installBtn = document.getElementById('installBtn');
     const dismissBtn = document.getElementById('dismissBtn');
+    const manualModal = document.getElementById('manualInstallModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
 
-    function showInstallUI() {
-      installTopbarBtn.classList.add('visible');
+    // Ukryj przycisk jeśli już zainstalowane (standalone mode)
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      installTopbarBtn.classList.add('hidden');
+    }
+
+    // Wykryj platformę dla instrukcji
+    function detectPlatform() {
+      const ua = navigator.userAgent;
+      if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+      if (/Android/.test(ua)) return 'android';
+      return 'desktop';
+    }
+
+    function showManualInstructions() {
+      const platform = detectPlatform();
+      document.getElementById('androidInstructions').style.display = platform === 'android' ? 'block' : 'none';
+      document.getElementById('iosInstructions').style.display = platform === 'ios' ? 'block' : 'none';
+      document.getElementById('desktopInstructions').style.display = platform === 'desktop' ? 'block' : 'none';
+      manualModal.classList.add('show');
     }
 
     function hideInstallUI() {
-      installTopbarBtn.classList.remove('visible');
+      installTopbarBtn.classList.add('hidden');
       installPrompt.classList.remove('show');
+      manualModal.classList.remove('show');
     }
 
     async function triggerInstall() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`📱 Wybór użytkownika: ${outcome}`);
-      deferredPrompt = null;
-      if (outcome === 'accepted') hideInstallUI();
+      if (deferredPrompt) {
+        // Natywna instalacja — Chrome/Edge
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`📱 Wybór: ${outcome}`);
+        deferredPrompt = null;
+        if (outcome === 'accepted') hideInstallUI();
+      } else {
+        // Fallback — pokaz instrukcję
+        showManualInstructions();
+      }
     }
 
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       deferredPrompt = e;
-      console.log('📱 Instalacja dostępna');
-      showInstallUI();
+      console.log('📱 Instalacja natywna dostępna');
     });
 
-    // Kliknięcie przycisku w topbarze — od razu otwiera natywny dialog
+    // Kliknięcie przycisku w topbarze
     installTopbarBtn.addEventListener('click', triggerInstall);
 
     // Kliknięcie w baner na dole
@@ -340,11 +461,19 @@
 
     dismissBtn.addEventListener('click', () => {
       installPrompt.classList.remove('show');
-      // Przycisk w topbarze pozostaje widoczny
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      manualModal.classList.remove('show');
+    });
+
+    // Zamknij modal klikając w tło
+    manualModal.addEventListener('click', e => {
+      if (e.target === manualModal) manualModal.classList.remove('show');
     });
 
     window.addEventListener('appinstalled', () => {
-      console.log('✅ Zainstalowano pomyślnie!');
+      console.log('✅ Zainstalowano!');
       hideInstallUI();
       deferredPrompt = null;
     });
