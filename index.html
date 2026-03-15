@@ -374,7 +374,7 @@
   <script>
     // Rejestracja Service Workera
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(reg => {
+      navigator.serviceWorker.register('./service-worker.js', { scope: '/Zegar/' }).then(reg => {
         console.log('✅ Service Worker zarejestrowany:', reg);
         
         reg.addEventListener('updatefound', () => {

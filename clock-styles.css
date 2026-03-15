@@ -218,6 +218,35 @@
   background: #000;
 }
 
+/* ===== Media Queries dla małych ekranów (< 480px) ===== */
+@media (max-width: 480px) {
+  .clock {
+    width: clamp(200px, min(88vw, 55vh), 340px);
+    height: clamp(200px, min(88vw, 55vh), 340px);
+    border-width: 3px;
+  }
+
+  .clock.clock-sm {
+    width: clamp(160px, min(78vw, 42vh), 260px);
+    height: clamp(160px, min(78vw, 42vh), 260px);
+  }
+
+  .clock.clock-lg {
+    width: clamp(220px, min(92vw, 60vh), 380px);
+    height: clamp(220px, min(92vw, 60vh), 380px);
+  }
+
+  .bg-controls {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .bg-controls .bg-btn {
+    width: clamp(24px, 7vw, 32px);
+    height: clamp(24px, 7vw, 32px);
+  }
+}
+
 .bg-controls .bg-btn:hover {
   transform: scale(1.1);
   border-color: #d82928;

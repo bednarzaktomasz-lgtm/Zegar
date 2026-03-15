@@ -3,20 +3,22 @@
  * Umożliwia pracę offline i cache'owanie zasobów
  */
 
-const CACHE_NAME = 'zegar-v1';
-const BASE_PATH = '/Zegar';
+const CACHE_NAME = 'zegar-v2';
+const BASE_PATH = '/Zegar/';
 
 const urlsToCache = [
-  `${BASE_PATH}/`,
-  `${BASE_PATH}/start.html`,
-  `${BASE_PATH}/nauka.html`,
-  `${BASE_PATH}/godziny.html`,
-  `${BASE_PATH}/wpisz.html`,
-  `${BASE_PATH}/ustaw.html`,
-  `${BASE_PATH}/ustawienia.html`,
-  `${BASE_PATH}/clock-renderer.js`,
-  `${BASE_PATH}/clock-styles.css`,
-  `${BASE_PATH}/manifest.json`,
+  BASE_PATH,
+  `${BASE_PATH}start.html`,
+  `${BASE_PATH}nauka.html`,
+  `${BASE_PATH}godziny.html`,
+  `${BASE_PATH}wpisz.html`,
+  `${BASE_PATH}ustaw.html`,
+  `${BASE_PATH}ustawienia.html`,
+  `${BASE_PATH}clock-renderer.js`,
+  `${BASE_PATH}clock-styles.css`,
+  `${BASE_PATH}manifest.json`,
+  `${BASE_PATH}icons/icon-192.png`,
+  `${BASE_PATH}icons/icon-512.png`,
 ];
 
 // Instalacja - cache zasobów
@@ -65,6 +67,27 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Stale-While-Revalidate dla plików CSS i JS
+  const isCssOrJs = url.pathname.endsWith('.css') || url.pathname.endsWith('.js');
+  if (isCssOrJs) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse || null);
+
+          // Zwróć cache natychmiast, a w tle zaktualizuj
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(request).then(response => {
       if (response) {
@@ -85,10 +108,10 @@ self.addEventListener('fetch', event => {
         });
 
         return response;
-      }).catch(err => {
+      }).catch(() => {
         console.log('[Service Worker] Fetch failed; returning offline page');
         // Zwróć cached HTML jeśli dostęp offline
-        return caches.match(`${BASE_PATH}/start.html`);
+        return caches.match(`${BASE_PATH}start.html`);
       });
     })
   );

@@ -10,15 +10,15 @@
   "theme_color": "#d82928",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000' width='192' height='192'/><circle cx='96' cy='96' r='80' fill='%23d82928'/><circle cx='96' cy='96' r='70' fill='%23000'/><line x1='96' y1='30' x2='96' y2='60' stroke='%23f0f0f0' stroke-width='4' stroke-linecap='round'/><line x1='96' y1='96' x2='96' y2='50' stroke='%23d82928' stroke-width='6' stroke-linecap='round'/><line x1='96' y1='96' x2='125' y2='96' stroke='%23f0f0f0' stroke-width='4' stroke-linecap='round'/><circle cx='96' cy='96' r='5' fill='%23f0f0f0'/></svg>",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23000' width='512' height='512'/><circle cx='256' cy='256' r='200' fill='%23d82928'/><circle cx='256' cy='256' r='180' fill='%23000'/><line x1='256' y1='76' x2='256' y2='140' stroke='%23f0f0f0' stroke-width='10' stroke-linecap='round'/><line x1='256' y1='256' x2='256' y2='120' stroke='%23d82928' stroke-width='15' stroke-linecap='round'/><line x1='256' y1='256' x2='330' y2='256' stroke='%23f0f0f0' stroke-width='10' stroke-linecap='round'/><circle cx='256' cy='256' r='12' fill='%23f0f0f0'/></svg>",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     }
   ],
