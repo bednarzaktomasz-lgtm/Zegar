@@ -15,25 +15,25 @@
     body {
       background: #000;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      width: 1200px;
-      height: 1920px;
+      width: 100%;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 48px 0 64px;
+      padding: clamp(16px, 4vw, 48px) 0 clamp(24px, 5vw, 64px);
     }
 
     .topbar {
-      width: 1100px;
+      width: min(1100px, 95vw);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .icon-btn {
-      width: 56px;
-      height: 56px;
+      width: clamp(36px, 8vw, 56px);
+      height: clamp(36px, 8vw, 56px);
       cursor: pointer;
       color: #555;
       transition: color 0.2s;
@@ -43,14 +43,14 @@
     .icon-btn:hover { color: #f0f0f0; }
 
     #clockContainer .clock {
-      width: 700px;
-      height: 700px;
+      width: clamp(280px, min(85vw, 55vh), 700px);
+      height: clamp(280px, min(85vw, 55vh), 700px);
     }
 
-    #clockContainer .clock .numbers .num { font-size: 42px; }
-    #clockContainer .clock .digital-time  { font-size: 18px; }
-    #clockContainer .clock .digital-date  { font-size: 10px; }
-    #clockContainer .clock .brand         { font-size: 22px; }
+    #clockContainer .clock .numbers .num { font-size: clamp(20px, 6cqi, 42px); }
+    #clockContainer .clock .digital-time  { font-size: clamp(9px, 2.6cqi, 18px); }
+    #clockContainer .clock .digital-date  { font-size: clamp(5px, 1.4cqi, 10px); }
+    #clockContainer .clock .brand         { font-size: clamp(11px, 3.1cqi, 22px); }
 
     /* Help hint */
     .hint-area {
@@ -74,8 +74,8 @@
     }
 
     .help-btn {
-      width: 56px;
-      height: 56px;
+      width: clamp(36px, 8vw, 56px);
+      height: clamp(36px, 8vw, 56px);
       border: none;
       background: transparent;
       color: #555;
@@ -97,11 +97,12 @@
 
     /* ---- Controls row: bg icons + hand color icons ---- */
     .controls-row {
-      width: 1100px;
+      width: min(1100px, 95vw);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 100px;
+      gap: clamp(24px, 5vw, 100px);
+      flex-wrap: wrap;
     }
 
     .controls-group {
@@ -126,8 +127,8 @@
     }
 
     #bgControlsContainer .bg-controls .bg-btn {
-      width: 64px;
-      height: 64px;
+      width: clamp(44px, 10vw, 64px);
+      height: clamp(44px, 10vw, 64px);
     }
 
     /* Hand color dots — same shape as bg-btn */
@@ -137,8 +138,8 @@
     }
 
     .hand-btn {
-      width: 64px;
-      height: 64px;
+      width: clamp(44px, 10vw, 64px);
+      height: clamp(44px, 10vw, 64px);
       border-radius: 50%;
       border: 2px solid #333;
       cursor: pointer;
@@ -162,7 +163,7 @@
 
     /* ---- Settings panel ---- */
     .settings-panel {
-      width: 1100px;
+      width: min(1100px, 95vw);
       display: flex;
       flex-direction: column;
       gap: 36px;
@@ -186,17 +187,19 @@
 
     .mode-toggles {
       display: flex;
-      gap: 16px;
+      gap: clamp(8px, 1.5vw, 16px);
+      flex-wrap: wrap;
     }
 
     .mode-toggle {
       flex: 1;
-      height: 100px;
+      min-width: clamp(100px, 28vw, 200px);
+      height: clamp(60px, 12vw, 100px);
       background: #111;
       border: 2px solid #222;
       border-radius: 16px;
       color: #888;
-      font-size: 1.4rem;
+      font-size: clamp(0.8rem, 2vw, 1.4rem);
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s, color 0.2s;
@@ -210,24 +213,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 80px;
+      height: clamp(56px, 10vw, 80px);
       background: #111;
       border: 2px solid #222;
       border-radius: 16px;
-      padding: 0 36px;
+      padding: 0 clamp(16px, 4vw, 36px);
     }
 
     .toggle-row span {
       color: #f0f0f0;
-      font-size: 1.6rem;
+      font-size: clamp(1rem, 2.5vw, 1.6rem);
       font-weight: 600;
     }
 
     .toggle-switch {
-      width: 80px;
-      height: 44px;
+      width: clamp(56px, 10vw, 80px);
+      height: clamp(30px, 6vw, 44px);
       background: #333;
-      border-radius: 22px;
+      border-radius: clamp(15px, 3vw, 22px);
       cursor: pointer;
       position: relative;
       transition: background 0.2s;
@@ -241,8 +244,8 @@
     .toggle-switch::after {
       content: '';
       position: absolute;
-      width: 36px;
-      height: 36px;
+      width: clamp(24px, 4.5vw, 36px);
+      height: clamp(24px, 4.5vw, 36px);
       background: white;
       border-radius: 50%;
       top: 4px;
@@ -251,7 +254,7 @@
     }
 
     .toggle-switch.active::after {
-      left: 40px;
+      left: clamp(28px, 5vw, 40px);
     }
   </style>
 </head>
