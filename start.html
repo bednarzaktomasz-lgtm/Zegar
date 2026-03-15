@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zegar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 1200px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 48px 0 64px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      width: 900px;
+      height: 260px;
+      text-decoration: none;
+      color: #f0f0f0;
+      background: #111;
+      border: 2px solid #222;
+      border-radius: 24px;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-btn:hover,
+    .nav-btn:active {
+      background: #1a1a1a;
+      border-color: var(--accent-color, #d82928);
+    }
+
+    .nav-btn .icon {
+      font-size: 3.2rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    .topbar {
+      width: 1100px;
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hint-area {
+      flex: 1;
+      margin: 0 28px;
+      color: #888;
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .hint-area.active { opacity: 1; }
+
+    .help-btn {
+      width: 56px;
+      height: 56px;
+      border: none;
+      background: transparent;
+      color: #555;
+      font-size: 2.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+      line-height: 1;
+    }
+    .help-btn:hover,
+    .help-btn.active {
+      color: #f0f0f0;
+    }
+
+    .settings-link {
+      width: 56px;
+      height: 56px;
+      color: #555;
+      transition: color 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .settings-link:hover {
+      color: #f0f0f0;
+      transform: rotate(90deg);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div style="width:56px"></div>
+    <div class="hint-area" id="hintArea">Wybierz tryb gry</div>
+    <div class="topbar-right">
+      <button class="help-btn" id="helpBtn">?</button>
+      <a href="ustawienia.html" class="settings-link" title="Ustawienia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="56" height="56">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l-4.24-4.24M19.78 19.78l-4.24-4.24m5.08-5.08l-4.24-4.24"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a href="nauka.html" class="nav-btn" data-hint="Swobodnie przestawiaj wskazówki zegara palcem i obserwuj czas na wyświetlaczu cyfrowym.">
+      <span class="icon">🎓</span>
+      Tryb Nauki
+    </a>
+
+    <a href="godziny.html" class="nav-btn" data-hint="Odczytaj godzinę z zegara analogowego i wybierz poprawną odpowiedź spośród trzech podanych.">
+      <span class="icon">⏱️</span>
+      Tryb Quizu
+    </a>
+
+    <a href="wpisz.html" class="nav-btn" data-hint="Odczytaj godzinę z zegara analogowego i wpisz ją samodzielnie cyframi na klawiaturze.">
+      <span class="icon">⌨️</span>
+      Wpisz Godzinę
+    </a>
+
+    <a href="ustaw.html" class="nav-btn" data-hint="Przestaw wskazówki zegara tak, aby pokazywały podaną godzinę, a następnie zatwierdź odpowiedź.">
+      <span class="icon">🎯</span>
+      Ustaw Godzinę
+    </a>
+  </div>
+
+  <div></div>
+
+  <script>
+    const handColor = localStorage.getItem('zegar_handColor') || 'white';
+    const colorMap = { white: '#f0f0f0', blue: '#2563eb', red: '#d82928' };
+    document.documentElement.style.setProperty('--accent-color', colorMap[handColor] || '#f0f0f0');
+
+    const helpBtn = document.getElementById('helpBtn');
+    const hintArea = document.getElementById('hintArea');
+    const defaultHint = 'Wybierz tryb gry';
+    let helpActive = false;
+
+    helpBtn.addEventListener('click', () => {
+      helpActive = !helpActive;
+      helpBtn.classList.toggle('active', helpActive);
+      hintArea.textContent = defaultHint;
+      hintArea.classList.toggle('active', helpActive);
+    });
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        hintArea.textContent = btn.dataset.hint;
+        hintArea.classList.add('active');
+      });
+      btn.addEventListener('mouseleave', () => {
+        hintArea.textContent = defaultHint;
+        hintArea.classList.toggle('active', helpActive);
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pl">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Wpisz Godzinę</title>
+		<link rel="stylesheet" href="clock-styles.css" />
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				background: #000;
+				color: #f0f0f0;
+				width: 1200px;
+				height: 1920px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: space-between;
+				padding: 48px 0 64px;
+			}
+
+			/* Top bar */
+			.topbar {
+				width: 1100px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.icon-btn {
+				width: 56px;
+				height: 56px;
+				cursor: pointer;
+				color: #555;
+				transition: color 0.2s;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			.icon-btn:hover { color: #f0f0f0; }
+
+			.settings-icon {
+				transition: color 0.2s, transform 0.2s;
+			}
+
+			.settings-icon:hover {
+				transform: rotate(90deg);
+			}
+
+			/* Clock */
+			#clockContainer .clock {
+				width: 700px;
+				height: 700px;
+			}
+
+			#clockContainer .clock .numbers .num {
+				font-size: 42px;
+			}
+
+			#clockContainer .clock .digital-time {
+				font-size: 18px;
+			}
+
+			#clockContainer .clock .digital-date {
+				font-size: 10px;
+			}
+
+			#clockContainer .clock .brand {
+				font-size: 22px;
+			}
+
+			/* Digital display */
+			.digital-input-display {
+				width: 700px;
+				height: 140px;
+				background: #111;
+				border: 2px solid #222;
+				border-radius: 24px;
+				font-size: 4rem;
+				font-weight: 700;
+				color: #f0f0f0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				letter-spacing: 0.1em;
+				font-family: "Consolas", "Courier New", monospace;
+				transition: border-color 0.2s, background 0.2s;
+				cursor: pointer;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			.digital-input-display:not(.correct):not(.wrong):hover {
+				border-color: #444;
+			}
+
+			.digital-input-display.correct {
+				background: #16a34a;
+				border-color: #16a34a;
+			}
+
+			.digital-input-display.wrong {
+				background: #dc2626;
+				border-color: #dc2626;
+			}
+
+			.digital-input-display .cursor {
+				animation: blink 1s infinite;
+			}
+
+			@keyframes blink {
+				0%, 50% { opacity: 1; }
+				51%, 100% { opacity: 0; }
+			}
+
+			/* Keyboard */
+			.keyboard {
+				display: flex;
+				flex-direction: column;
+				gap: 16px;
+				width: 700px;
+			}
+
+			.keyboard-row {
+				display: flex;
+				gap: 16px;
+				justify-content: center;
+			}
+
+			.key {
+				width: 140px;
+				height: 100px;
+				background: #111;
+				border: 2px solid #222;
+				border-radius: 16px;
+				font-size: 2.4rem;
+				font-weight: 600;
+				cursor: pointer;
+				color: #f0f0f0;
+				transition: background 0.2s, border-color 0.2s;
+				-webkit-tap-highlight-color: transparent;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.key:hover {
+				background: #1a1a1a;
+				border-color: #444;
+			}
+
+			.key:active {
+				background: #222;
+			}
+
+			.key.key-wide {
+				width: 220px;
+			}
+
+			.key.key-confirm {
+				background: #333;
+			}
+
+			.key.key-confirm:hover {
+				background: #444;
+			}
+
+			.key.key-delete {
+				background: #333;
+			}
+
+			.key.key-delete:hover {
+				background: #444;
+			}
+
+			/* Feedback & score */
+			.bottom-info {
+				width: 700px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.feedback {
+				font-size: 1.8rem;
+				font-weight: 600;
+				min-height: 48px;
+			}
+
+			.feedback.ok  { color: #16a34a; }
+			.feedback.bad { color: #dc2626; }
+
+			.score {
+				font-size: 1.8rem;
+				font-weight: 600;
+				color: #555;
+			}
+
+			/* Modal */
+			.modal {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.7);
+				z-index: 1000;
+			}
+
+			.modal.active {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.modal-content {
+				background: #111;
+				border: 2px solid #222;
+				border-radius: 24px;
+				padding: 48px;
+				min-width: 600px;
+				display: grid;
+				gap: 20px;
+			}
+
+			.modal-modes {
+				display: grid;
+				gap: 16px;
+			}
+
+			.mode-toggle {
+				padding: 24px 28px;
+				border: 2px solid #333;
+				background: #1a1a1a;
+				border-radius: 16px;
+				font-size: 1.2rem;
+				font-weight: 600;
+				cursor: pointer;
+				color: #f0f0f0;
+				transition: all 0.2s;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			.mode-toggle:hover  { background: #222; }
+			.mode-toggle.active { background: #2563eb; border-color: #2563eb; color: white; }
+
+			.sound-toggle {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 24px 28px;
+				background: #1a1a1a;
+				border: 2px solid #333;
+				border-radius: 16px;
+				font-size: 1.4rem;
+				font-weight: 600;
+				cursor: pointer;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			.toggle-switch {
+				width: 72px;
+				height: 36px;
+				background: #333;
+				border-radius: 18px;
+				position: relative;
+				transition: background 0.2s;
+				flex-shrink: 0;
+			}
+
+			.toggle-switch.active {
+				background: #16a34a;
+			}
+
+			.toggle-switch::after {
+				content: '';
+				position: absolute;
+				width: 28px;
+				height: 28px;
+				background: white;
+				border-radius: 50%;
+				top: 4px;
+				left: 4px;
+				transition: transform 0.2s;
+			}
+
+			.toggle-switch.active::after {
+				transform: translateX(36px);
+			}
+
+			/* Help hint */
+			.hint-area {
+				flex: 1;
+				margin: 0 28px;
+				color: #888;
+				font-size: 1.3rem;
+				font-weight: 500;
+				line-height: 1.5;
+				text-align: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.2s;
+			}
+			.hint-area.active { opacity: 1; }
+
+			.topbar-right {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.help-btn {
+				width: 56px;
+				height: 56px;
+				border: none;
+				background: transparent;
+				color: #555;
+				font-size: 2.8rem;
+				font-weight: 700;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: color 0.2s;
+				-webkit-tap-highlight-color: transparent;
+				padding: 0;
+				line-height: 1;
+			}
+			.help-btn:hover,
+			.help-btn.active {
+				color: #f0f0f0;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="topbar">
+			<a href="start.html" title="Wróć do menu">
+				<svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+					<polyline points="9 22 9 12 15 12 15 22"></polyline>
+				</svg>
+			</a>
+			<div class="hint-area" id="hintArea">Odczytaj godzinę z zegara i wpisz ją na klawiaturze cyfrowej. Zatwierdź przyciskiem OK.</div>
+			<div class="topbar-right">
+				<button class="help-btn" id="helpBtn">?</button>
+				<svg class="icon-btn settings-icon" id="settingsIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="3"></circle>
+					<path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m-5.08-5.08l-4.24-4.24M19.78 19.78l-4.24-4.24m-5.08-5.08l-4.24-4.24"></path>
+				</svg>
+			</div>
+		</div>
+
+		<div id="clockContainer"></div>
+
+		<div class="digital-input-display" id="digitalDisplay">--:--</div>
+
+		<div class="keyboard">
+			<div class="keyboard-row">
+				<button class="key" data-key="1">1</button>
+				<button class="key" data-key="2">2</button>
+				<button class="key" data-key="3">3</button>
+			</div>
+			<div class="keyboard-row">
+				<button class="key" data-key="4">4</button>
+				<button class="key" data-key="5">5</button>
+				<button class="key" data-key="6">6</button>
+			</div>
+			<div class="keyboard-row">
+				<button class="key" data-key="7">7</button>
+				<button class="key" data-key="8">8</button>
+				<button class="key" data-key="9">9</button>
+			</div>
+			<div class="keyboard-row">
+				<button class="key key-delete" data-key="delete">⌫</button>
+				<button class="key" data-key="0">0</button>
+				<button class="key key-confirm" data-key="ok">OK</button>
+			</div>
+		</div>
+
+		<div class="bottom-info">
+			<div class="feedback" id="feedback"></div>
+			<div class="score" id="score">Wynik: 0 / 0</div>
+		</div>
+
+		<div class="modal" id="settingsModal">
+			<div class="modal-content">
+				<div class="modal-modes">
+					<button class="mode-toggle active" data-mode="full">Pełne godziny</button>
+					<button class="mode-toggle" data-mode="half">Połówki (30 min)</button>
+					<button class="mode-toggle" data-mode="quarter">Kwadranse (15, 45 min)</button>
+					<button class="mode-toggle" data-mode="five">Co 5 minut</button>
+					<button class="mode-toggle" data-mode="any">Każda minuta</button>
+				</div>
+				<div class="sound-toggle" id="soundToggleRow">
+					<span>Dźwięki</span>
+					<div class="toggle-switch active" id="soundToggle"></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="clock-renderer.js"></script>
+		<script>
+			// ==================== Load Global Settings ====================
+			const STORAGE_KEYS = {
+				activeModes: 'zegar_activeModes',
+				soundEnabled: 'zegar_soundEnabled',
+				clockBg: 'zegar_clockBg',
+				handColor: 'zegar_handColor',
+			};
+
+			function loadGlobalSettings() {
+				return {
+					activeModes: JSON.parse(localStorage.getItem(STORAGE_KEYS.activeModes)) || ['full'],
+					soundEnabled: localStorage.getItem(STORAGE_KEYS.soundEnabled) !== 'false',
+					clockBg: localStorage.getItem(STORAGE_KEYS.clockBg) || 'solid',
+					handColor: localStorage.getItem(STORAGE_KEYS.handColor) || 'white',
+				};
+			}
+
+			const globalSettings = loadGlobalSettings();
+
+			// Initialize clock using the module
+			const clockContainer = document.getElementById("clockContainer");
+			const clock = new ClockRenderer(clockContainer, {
+				size: 'sm',
+				interactive: false,
+				showBrand: true,
+				showDigital: true,
+				showDate: true,
+				showSecondHand: false,
+				showBgControls: false,
+				handColor: globalSettings.handColor,
+			});
+
+			// Apply saved background
+			clock.setBackground(globalSettings.clockBg);
+
+			const feedbackEl = document.getElementById("feedback");
+			const scoreEl = document.getElementById("score");
+			const digitalDisplay = document.getElementById("digitalDisplay");
+
+			let currentTime = { hour: 12, minute: 0 };
+			let inputValue = "";
+			let totalAnswers = 0;
+			let correctAnswers = 0;
+			let activeModes = new Set(globalSettings.activeModes);
+			let soundEnabled = globalSettings.soundEnabled;
+			let audioContext = null;
+			let isChecking = false;
+
+			// Sync mode toggles UI to match loaded settings
+			document.querySelectorAll('.mode-toggle').forEach(btn => {
+				btn.classList.toggle('active', activeModes.has(btn.dataset.mode));
+			});
+
+			// Sync sound toggle UI
+			const soundToggleInit = document.getElementById('soundToggle');
+			soundToggleInit.classList.toggle('active', soundEnabled);
+
+			function initAudioContext() {
+				if (!audioContext) {
+					audioContext = new (window.AudioContext || window.webkitAudioContext)();
+				}
+				if (audioContext.state === 'suspended') {
+					audioContext.resume();
+				}
+			}
+
+			function playBeep(frequency, duration) {
+				if (!soundEnabled) return;
+				initAudioContext();
+				const oscillator = audioContext.createOscillator();
+				const gainNode = audioContext.createGain();
+				oscillator.connect(gainNode);
+				gainNode.connect(audioContext.destination);
+				oscillator.frequency.value = frequency;
+				oscillator.type = 'sine';
+				gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+				gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+				oscillator.start(audioContext.currentTime);
+				oscillator.stop(audioContext.currentTime + duration / 1000);
+			}
+
+			function playSuccess() { playBeep(880, 150); }
+			function playError()   { playBeep(220, 300); }
+			function playClick()   { playBeep(440, 50); }
+
+			const MODE_MINUTES = {
+				full: [0],
+				half: [30],
+				quarter: [15, 45],
+				five: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+				any: Array.from({ length: 60 }, (_, i) => i),
+			};
+
+			function formatTime(hour, minute) {
+				const h = String(hour).padStart(2, "0");
+				const m = String(minute).padStart(2, "0");
+				return `${h}:${m}`;
+			}
+
+			function randomMinute() {
+				const allMinutes = new Set();
+				activeModes.forEach((mode) => {
+					MODE_MINUTES[mode].forEach((m) => allMinutes.add(m));
+				});
+				const minutesArray = Array.from(allMinutes);
+				return minutesArray[Math.floor(Math.random() * minutesArray.length)];
+			}
+
+			function updateDisplay() {
+				// Format input as HH:MM
+				let display = "";
+				const digits = inputValue.padEnd(4, "-");
+				display = digits.slice(0, 2) + ":" + digits.slice(2, 4);
+				digitalDisplay.textContent = display;
+			}
+
+			function setNewQuestion() {
+				const hour = Math.floor(Math.random() * 12) + 1;
+				const minute = randomMinute();
+				currentTime = { hour, minute };
+
+				// Use clock renderer to display time
+				clock.setTime(hour, minute);
+
+				// Reset input
+				inputValue = "";
+				isChecking = false;
+				updateDisplay();
+
+				digitalDisplay.classList.remove("correct", "wrong");
+				feedbackEl.textContent = "";
+				feedbackEl.className = "feedback";
+			}
+
+			function handleKeyPress(key) {
+				if (isChecking) return;
+
+				if (key === "delete") {
+					if (inputValue.length > 0) {
+						inputValue = inputValue.slice(0, -1);
+						playClick();
+					}
+				} else if (key === "ok") {
+					checkAnswer();
+				} else if (inputValue.length < 4) {
+					inputValue += key;
+					playClick();
+				}
+
+				updateDisplay();
+			}
+
+			function checkAnswer() {
+				if (inputValue.length !== 4 || isChecking) return;
+
+				isChecking = true;
+				totalAnswers += 1;
+
+				const inputHour = parseInt(inputValue.slice(0, 2), 10);
+				const inputMinute = parseInt(inputValue.slice(2, 4), 10);
+				const correctTimeText = formatTime(currentTime.hour, currentTime.minute);
+
+				// Check if answer matches (allowing 12 to match with leading zero as 12)
+				const isCorrect = (inputHour === currentTime.hour || (inputHour === 0 && currentTime.hour === 12)) 
+					&& inputMinute === currentTime.minute;
+
+				if (isCorrect) {
+					correctAnswers += 1;
+					feedbackEl.textContent = `Dobrze! ${correctTimeText}.`;
+					feedbackEl.className = "feedback ok";
+					digitalDisplay.classList.add("correct");
+					playSuccess();
+				} else {
+					feedbackEl.textContent = `Nie tym razem. ${correctTimeText}.`;
+					feedbackEl.className = "feedback bad";
+					digitalDisplay.classList.add("wrong");
+					playError();
+				}
+				scoreEl.textContent = `Wynik: ${correctAnswers} / ${totalAnswers}`;
+
+				setTimeout(setNewQuestion, 2000);
+			}
+
+			// Keyboard event listeners
+			document.querySelectorAll('.key').forEach(key => {
+				key.addEventListener('click', () => {
+					handleKeyPress(key.dataset.key);
+				});
+			});
+
+			// Click on digital display to confirm
+			digitalDisplay.addEventListener('click', () => {
+				handleKeyPress('ok');
+			});
+
+			// Physical keyboard support
+			document.addEventListener('keydown', (e) => {
+				if (e.key >= '0' && e.key <= '9') {
+					handleKeyPress(e.key);
+				} else if (e.key === 'Backspace') {
+					handleKeyPress('delete');
+				} else if (e.key === 'Enter') {
+					handleKeyPress('ok');
+				}
+			});
+
+			const settingsIcon = document.getElementById("settingsIcon");
+			const settingsModal = document.getElementById("settingsModal");
+
+			settingsIcon.addEventListener("click", () => {
+				settingsModal.classList.add("active");
+			});
+
+			settingsModal.addEventListener("click", (e) => {
+				if (e.target === settingsModal) {
+					settingsModal.classList.remove("active");
+				}
+			});
+
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape") {
+					settingsModal.classList.remove("active");
+				}
+			});
+
+			document.querySelectorAll(".mode-toggle").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const mode = btn.dataset.mode;
+					if (activeModes.has(mode)) {
+						if (activeModes.size > 1) {
+							activeModes.delete(mode);
+							btn.classList.remove("active");
+						}
+					} else {
+						activeModes.add(mode);
+						btn.classList.add("active");
+					}
+					setNewQuestion();
+				});
+			});
+
+			const soundToggle = document.getElementById("soundToggle");
+			soundToggle.addEventListener("click", () => {
+				soundEnabled = !soundEnabled;
+				soundToggle.classList.toggle("active");
+				if (soundEnabled) {
+					initAudioContext();
+					playBeep(660, 100);
+				}
+			});
+
+			const helpBtn = document.getElementById('helpBtn');
+			const hintArea = document.getElementById('hintArea');
+			helpBtn.addEventListener('click', () => {
+				hintArea.classList.toggle('active');
+				helpBtn.classList.toggle('active');
+			});
+
+			setNewQuestion();
+		</script>
+	</body>
+</html>

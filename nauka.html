@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nauka godzin - Tryb Interaktywny</title>
+  <link rel="stylesheet" href="clock-styles.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 1200px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 48px 0 64px;
+    }
+
+    .topbar {
+      width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .icon-btn {
+      width: 56px;
+      height: 56px;
+      cursor: pointer;
+      color: #555;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .icon-btn:hover { color: #f0f0f0; }
+
+    #clockContainer .clock {
+      width: 700px;
+      height: 700px;
+    }
+
+    #clockContainer .clock .numbers .num { font-size: 42px; }
+    #clockContainer .clock .digital-time  { font-size: 18px; }
+    #clockContainer .clock .digital-date  { font-size: 10px; }
+    #clockContainer .clock .brand         { font-size: 22px; }
+
+    #timeDisplay {
+      width: 700px;
+      height: 140px;
+      background: #111;
+      border: 2px solid #222;
+      border-radius: 24px;
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .clock-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* Help hint */
+    .hint-area {
+      flex: 1;
+      margin: 0 28px;
+      color: #888;
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .hint-area.active { opacity: 1; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .help-btn {
+      width: 56px;
+      height: 56px;
+      border: none;
+      background: transparent;
+      color: #555;
+      font-size: 2.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+      line-height: 1;
+    }
+    .help-btn:hover,
+    .help-btn.active {
+      color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="start.html" title="Wróć do menu">
+    <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </svg>
+  </a>
+  <div class="hint-area" id="hintArea">Przeciągnij wskazówki zegara palcem. Wskazówka minutowa jest dłuższa, godzinowa krótsza.</div>
+  <div class="topbar-right">
+    <button class="help-btn" id="helpBtn">?</button>
+  </div>
+</div>
+
+<div class="clock-group">
+<div id="clockContainer"></div>
+
+<p id="timeDisplay">12:00</p>
+</div>
+
+<div></div>
+
+<script src="clock-renderer.js"></script>
+<script>
+  // ==================== Load Global Settings ====================
+  const STORAGE_KEYS = {
+    clockBg: 'zegar_clockBg',
+    handColor: 'zegar_handColor',
+  };
+
+  function loadGlobalSettings() {
+    return {
+      clockBg: localStorage.getItem(STORAGE_KEYS.clockBg) || 'solid',
+      handColor: localStorage.getItem(STORAGE_KEYS.handColor) || 'white',
+    };
+  }
+
+  const globalSettings = loadGlobalSettings();
+
+  const clockContainer = document.getElementById("clockContainer");
+  const display = document.getElementById("timeDisplay");
+
+  const clock = new ClockRenderer(clockContainer, {
+    size: 'normal',
+    interactive: true,
+    showBrand: true,
+    showDigital: true,
+    showDate: true,
+    showSecondHand: true,
+    showBgControls: false,
+    handColor: globalSettings.handColor,
+    onTimeChange: (h, m) => {
+      const hStr = String(h).padStart(2, "0");
+      const mStr = String(m).padStart(2, "0");
+      display.textContent = `${hStr}:${mStr}`;
+    }
+  });
+
+  // Apply background from global settings
+  clock.setBackground(globalSettings.clockBg);
+
+  const helpBtn = document.getElementById('helpBtn');
+  const hintArea = document.getElementById('hintArea');
+  helpBtn.addEventListener('click', () => {
+    hintArea.classList.toggle('active');
+    helpBtn.classList.toggle('active');
+  });
+</script>
+
+</body>
+</html>
