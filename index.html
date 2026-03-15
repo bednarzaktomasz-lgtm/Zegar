@@ -137,6 +137,33 @@
       transform: rotate(90deg);
     }
 
+    .install-topbar-btn {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px;
+      height: 56px;
+      background: #d82928;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .install-topbar-btn.visible {
+      display: flex;
+    }
+
+    .install-topbar-btn:hover {
+      background: #ff3333;
+      transform: scale(1.03);
+    }
+
     .install-prompt {
       position: fixed;
       bottom: 20px;
@@ -202,6 +229,7 @@
     <div style="width:56px"></div>
     <div class="hint-area" id="hintArea">Wybierz tryb gry</div>
     <div class="topbar-right">
+      <button class="install-topbar-btn" id="installTopbarBtn" title="Zainstaluj aplikację">📲 Zainstaluj</button>
       <button class="help-btn" id="helpBtn">?</button>
       <a href="ustawienia.html" class="settings-link" title="Ustawienia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="56" height="56">
@@ -273,70 +301,53 @@
     }
 
     // PWA Install Prompt
-    let deferredPrompt;
-    let promptDismissedThisSession = false;
+    let deferredPrompt = null;
+    const installTopbarBtn = document.getElementById('installTopbarBtn');
     const installPrompt = document.getElementById('installPrompt');
     const installBtn = document.getElementById('installBtn');
     const dismissBtn = document.getElementById('dismissBtn');
-    const PROMPT_DELAY = 3000; // 3 sekundy
+
+    function showInstallUI() {
+      installTopbarBtn.classList.add('visible');
+    }
+
+    function hideInstallUI() {
+      installTopbarBtn.classList.remove('visible');
+      installPrompt.classList.remove('show');
+    }
+
+    async function triggerInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`📱 Wybór użytkownika: ${outcome}`);
+      deferredPrompt = null;
+      if (outcome === 'accepted') hideInstallUI();
+    }
 
     window.addEventListener('beforeinstallprompt', e => {
-      console.log('📱 beforeinstallprompt event captured');
       e.preventDefault();
       deferredPrompt = e;
-      
-      // Resetuj flagi po każdym nowym evencie
-      promptDismissedThisSession = false;
-      
-      // Pokaż prompt
-      setTimeout(() => {
-        if (deferredPrompt && !promptDismissedThisSession) {
-          console.log('📱 Pokazuję install prompt');
-          installPrompt.classList.add('show');
-        }
-      }, PROMPT_DELAY);
+      console.log('📱 Instalacja dostępna');
+      showInstallUI();
     });
 
-    installBtn.addEventListener('click', async () => {
-      console.log('👆 Kliknięto Instaluj');
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`✅ User escolhio: ${outcome}`);
-        
-        if (outcome === 'accepted') {
-          console.log('📱 Aplikacja zainstalowana poprawnie');
-        }
-        
-        deferredPrompt = null;
-        promptDismissedThisSession = true;
-        installPrompt.classList.remove('show');
-      } else {
-        console.warn('⚠️ deferredPrompt nie jest dostępny');
-      }
-    });
+    // Kliknięcie przycisku w topbarze — od razu otwiera natywny dialog
+    installTopbarBtn.addEventListener('click', triggerInstall);
+
+    // Kliknięcie w baner na dole
+    installBtn.addEventListener('click', triggerInstall);
 
     dismissBtn.addEventListener('click', () => {
-      console.log('❌ User odrzucił prompt');
-      promptDismissedThisSession = true;
       installPrompt.classList.remove('show');
-      // Nie blokujemy localStorage - prompt będzie dostępny po odświeżeniu
+      // Przycisk w topbarze pozostaje widoczny
     });
 
     window.addEventListener('appinstalled', () => {
-      console.log('✅ Aplikacja zainstalowana na urządzeniu!');
-      installPrompt.classList.remove('show');
-      promptDismissedThisSession = true;
+      console.log('✅ Zainstalowano pomyślnie!');
+      hideInstallUI();
       deferredPrompt = null;
     });
-
-    // Debug - możliwość resetowania w konsoli
-    window.resetInstallPrompt = () => {
-      console.log('🔄 Resetuję install prompt');
-      promptDismissedThisSession = false;
-      deferredPrompt = null;
-      installPrompt.classList.remove('show');
-    };
 
     // Kolorowanie zgodnie z ustawieniami
     const handColor = localStorage.getItem('zegar_handColor') || 'white';
