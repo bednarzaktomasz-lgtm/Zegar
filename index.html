@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interaktywna aplikacja do nauki czytania godzin na zegarze analogowym. Naucz się czytać godziny w różnych trybów edukacyjnych.">
+  <meta name="theme-color" content="#d82928">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zegar">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- PWA Icon dla Apple -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23000' width='180' height='180'/><circle cx='90' cy='90' r='70' fill='%23d82928'/><circle cx='90' cy='90' r='62' fill='%23000'/><line x1='90' y1='28' x2='90' y2='54' stroke='%23f0f0f0' stroke-width='4' stroke-linecap='round'/><line x1='90' y1='90' x2='90' y2='45' stroke='%23d82928' stroke-width='5' stroke-linecap='round'/><line x1='90' y1='90' x2='115' y2='90' stroke='%23f0f0f0' stroke-width='3' stroke-linecap='round'/><circle cx='90' cy='90' r='4' fill='%23f0f0f0'/></svg>">
+  
+  <title>Zegar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 1200px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 48px 0 64px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      width: 900px;
+      height: 260px;
+      text-decoration: none;
+      color: #f0f0f0;
+      background: #111;
+      border: 2px solid #222;
+      border-radius: 24px;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-btn:hover,
+    .nav-btn:active {
+      background: #1a1a1a;
+      border-color: var(--accent-color, #d82928);
+    }
+
+    .nav-btn .icon {
+      font-size: 3.2rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    .topbar {
+      width: 1100px;
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hint-area {
+      flex: 1;
+      margin: 0 28px;
+      color: #888;
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .hint-area.active { opacity: 1; }
+
+    .help-btn {
+      width: 56px;
+      height: 56px;
+      border: none;
+      background: transparent;
+      color: #555;
+      font-size: 2.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+      line-height: 1;
+    }
+    .help-btn:hover,
+    .help-btn.active {
+      color: #f0f0f0;
+    }
+
+    .settings-link {
+      width: 56px;
+      height: 56px;
+      color: #555;
+      transition: color 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .settings-link:hover {
+      color: #f0f0f0;
+      transform: rotate(90deg);
+    }
+
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1a1a1a;
+      border: 2px solid #d82928;
+      border-radius: 12px;
+      padding: 16px;
+      color: #f0f0f0;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 300px;
+    }
+
+    .install-prompt.show {
+      display: flex;
+    }
+
+    .install-prompt-text {
+      font-size: 0.9rem;
+    }
+
+    .install-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .install-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .install-btn.install {
+      background: #d82928;
+      color: #000;
+    }
+
+    .install-btn.install:hover {
+      background: #ff3333;
+    }
+
+    .install-btn.cancel {
+      background: #333;
+      color: #f0f0f0;
+    }
+
+    .install-btn.cancel:hover {
+      background: #444;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div style="width:56px"></div>
+    <div class="hint-area" id="hintArea">Wybierz tryb gry</div>
+    <div class="topbar-right">
+      <button class="help-btn" id="helpBtn">?</button>
+      <a href="ustawienia.html" class="settings-link" title="Ustawienia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="56" height="56">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l-4.24-4.24M19.78 19.78l-4.24-4.24m5.08-5.08l-4.24-4.24"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a href="nauka.html" class="nav-btn" data-hint="Swobodnie przestawiaj wskazówki zegara palcem i obserwuj czas na wyświetlaczu cyfrowym.">
+      <span class="icon">🎓</span>
+      Tryb Nauki
+    </a>
+
+    <a href="godziny.html" class="nav-btn" data-hint="Odczytaj godzinę z zegara analogowego i wybierz poprawną odpowiedź spośród trzech podanych.">
+      <span class="icon">⏱️</span>
+      Tryb Quizu
+    </a>
+
+    <a href="wpisz.html" class="nav-btn" data-hint="Odczytaj godzinę z zegara analogowego i wpisz ją samodzielnie cyframi na klawiaturze.">
+      <span class="icon">⌨️</span>
+      Wpisz Godzinę
+    </a>
+
+    <a href="ustaw.html" class="nav-btn" data-hint="Przestaw wskazówki zegara tak, aby pokazywały podaną godzinę, a następnie zatwierdź odpowiedź.">
+      <span class="icon">🎯</span>
+      Ustaw Godzinę
+    </a>
+  </div>
+
+  <div></div>
+
+  <!-- Install Prompt -->
+  <div class="install-prompt" id="installPrompt">
+    <div class="install-prompt-text">🚀 Zainstaluj aplikację Zegar na swoim urządzeniu!</div>
+    <div class="install-buttons">
+      <button class="install-btn install" id="installBtn">Instaluj</button>
+      <button class="install-btn cancel" id="dismissBtn">Nie, dzięki</button>
+    </div>
+  </div>
+
+  <script>
+    // Rejestracja Service Workera
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        console.log('✅ Service Worker zarejestrowany:', reg);
+        
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🔄 Nowa wersja aplikacji dostępna');
+              // Można tutaj pokazać powiadomienie o nowej wersji
+            }
+          });
+        });
+      }).catch(err => {
+        console.error('❌ Błąd rejestracji Service Workera:', err);
+      });
+
+      // Automatyczne sprawdzanie aktualizacji co 60 sekund
+      setInterval(() => {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) reg.update();
+        });
+      }, 60000);
+    }
+
+    // PWA Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const dismissBtn = document.getElementById('dismissBtn');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Pokaż prompt jeśli nie był wcześniej odrzucony
+      if (!localStorage.getItem('pwaInstallDismissed')) {
+        setTimeout(() => {
+          installPrompt.classList.add('show');
+        }, 2000);
+      }
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+        installPrompt.classList.remove('show');
+      }
+    });
+
+    dismissBtn.addEventListener('click', () => {
+      localStorage.setItem('pwaInstallDismissed', 'true');
+      installPrompt.classList.remove('show');
+      deferredPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ Aplikacja zainstalowana!');
+      installPrompt.classList.remove('show');
+      deferredPrompt = null;
+    });
+
+    // Kolorowanie zgodnie z ustawieniami
+    const handColor = localStorage.getItem('zegar_handColor') || 'white';
+    const colorMap = { white: '#f0f0f0', blue: '#2563eb', red: '#d82928' };
+    document.documentElement.style.setProperty('--accent-color', colorMap[handColor] || '#f0f0f0');
+
+    // Help system
+    const helpBtn = document.getElementById('helpBtn');
+    const hintArea = document.getElementById('hintArea');
+    const defaultHint = 'Wybierz tryb gry';
+    let helpActive = false;
+
+    helpBtn.addEventListener('click', () => {
+      helpActive = !helpActive;
+      helpBtn.classList.toggle('active', helpActive);
+      hintArea.textContent = defaultHint;
+      hintArea.classList.toggle('active', helpActive);
+    });
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        hintArea.textContent = btn.dataset.hint;
+        hintArea.classList.add('active');
+      });
+      btn.addEventListener('mouseleave', () => {
+        hintArea.textContent = defaultHint;
+        hintArea.classList.toggle('active', helpActive);
+      });
+    });
+  </script>
+
+</body>
+</html>
